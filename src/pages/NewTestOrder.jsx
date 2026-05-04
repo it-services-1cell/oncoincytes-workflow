@@ -3,32 +3,33 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 import useStore from '../store/useStore';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+const FormField = ({ label, error, children }) => (
+  <div className="space-y-1.5">
+    <Label className="text-sm font-medium text-slate-700">{label}</Label>
+    {children}
+    {error && <p className="text-xs text-destructive">{error}</p>}
+  </div>
+);
 
 const NewTestOrder = () => {
   const navigate = useNavigate();
   const addTestOrder = useStore((state) => state.addTestOrder);
 
-  // Form State
   const [formData, setFormData] = useState({
-    patientName: '',
-    patientDOB: '',
-    patientID: '',
-    physicianName: '',
-    hospitalName: '',
-    specimenType: '',
-    collectionDate: '',
+    patientName: '', patientDOB: '', patientID: '',
+    physicianName: '', hospitalName: '', specimenType: '', collectionDate: '',
   });
-
-  // Validation State
   const [errors, setErrors] = useState({});
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const handleChange = (name, value) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error when typing
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: null }));
-    }
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: null }));
   };
 
   const validateForm = () => {
@@ -40,7 +41,6 @@ const NewTestOrder = () => {
     if (!formData.hospitalName.trim()) newErrors.hospitalName = 'Hospital Name is required';
     if (!formData.specimenType) newErrors.specimenType = 'Specimen Type is required';
     if (!formData.collectionDate) newErrors.collectionDate = 'Collection Date is required';
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -48,180 +48,141 @@ const NewTestOrder = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateForm()) {
-      addTestOrder({
-        ...formData,
-        status: 'Pending',
-        // testName and id, createdAt are handled by the store
-      });
+      addTestOrder({ ...formData, status: 'Pending' });
       toast.success('Test order created successfully');
       navigate('/test-orders');
     }
   };
 
   return (
-    <div className="page-container">
-      <div className="page-header header-with-actions">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Link to="/test-orders" className="back-link">
-            <ArrowLeft size={20} />
-          </Link>
-          <h1 className="page-title">New Test Order</h1>
+    <div className="p-6 max-w-4xl mx-auto space-y-6">
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" asChild>
+          <Link to="/test-orders"><ArrowLeft size={20} /></Link>
+        </Button>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">New Test Order</h1>
+          <p className="text-sm text-muted-foreground">Create a new OncoIncyte test order</p>
         </div>
       </div>
 
-      <div className="card">
-        <form onSubmit={handleSubmit} className="form-container">
-          {/* Patient Section */}
-          <div className="form-section">
-            <h3 className="form-section-title">Patient Information</h3>
-            <div className="form-grid">
-              <div className="form-group">
-                <label className="form-label" htmlFor="patientName">Full Name</label>
-                <input
-                  type="text"
-                  id="patientName"
-                  name="patientName"
-                  className={`form-input ${errors.patientName ? 'input-error' : ''}`}
-                  value={formData.patientName}
-                  onChange={handleChange}
-                  placeholder="e.g. John Doe"
-                />
-                {errors.patientName && <span className="error-text">{errors.patientName}</span>}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Patient */}
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base text-slate-700">Patient Information</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <FormField label="Full Name" error={errors.patientName}>
+              <Input
+                placeholder="e.g. John Doe"
+                value={formData.patientName}
+                onChange={(e) => handleChange('patientName', e.target.value)}
+                className={errors.patientName ? 'border-destructive' : ''}
+              />
+            </FormField>
+            <FormField label="Date of Birth" error={errors.patientDOB}>
+              <Input
+                type="date"
+                value={formData.patientDOB}
+                onChange={(e) => handleChange('patientDOB', e.target.value)}
+                className={errors.patientDOB ? 'border-destructive' : ''}
+              />
+            </FormField>
+            <FormField label="Patient ID" error={errors.patientID}>
+              <Input
+                placeholder="e.g. PID-12345"
+                value={formData.patientID}
+                onChange={(e) => handleChange('patientID', e.target.value)}
+                className={errors.patientID ? 'border-destructive' : ''}
+              />
+            </FormField>
+          </CardContent>
+        </Card>
+
+        {/* Physician */}
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base text-slate-700">Requesting Physician</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField label="Physician Full Name" error={errors.physicianName}>
+              <Input
+                placeholder="e.g. Dr. Emily Chen"
+                list="physician-list"
+                value={formData.physicianName}
+                onChange={(e) => handleChange('physicianName', e.target.value)}
+                className={errors.physicianName ? 'border-destructive' : ''}
+              />
+              <datalist id="physician-list">
+                <option value="Dr. Emily Chen" />
+                <option value="Dr. Michael Rodriguez" />
+                <option value="Dr. Sarah Lee" />
+                <option value="Dr. David Kim" />
+              </datalist>
+            </FormField>
+            <FormField label="Hospital / Institution" error={errors.hospitalName}>
+              <Input
+                placeholder="e.g. General Memorial Hospital"
+                list="hospital-list"
+                value={formData.hospitalName}
+                onChange={(e) => handleChange('hospitalName', e.target.value)}
+                className={errors.hospitalName ? 'border-destructive' : ''}
+              />
+              <datalist id="hospital-list">
+                <option value="General Memorial Hospital" />
+                <option value="City Cancer Center" />
+                <option value="University Hospital" />
+                <option value="Regional Medical Center" />
+              </datalist>
+            </FormField>
+          </CardContent>
+        </Card>
+
+        {/* Test Details */}
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="text-base text-slate-700">Test Details</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <FormField label="Test Name">
+              <div className="flex h-10 items-center px-3 rounded-md border bg-muted text-muted-foreground text-sm">
+                OncoIncyte
               </div>
+            </FormField>
+            <FormField label="Specimen Type" error={errors.specimenType}>
+              <Select value={formData.specimenType} onValueChange={(v) => handleChange('specimenType', v)}>
+                <SelectTrigger className={errors.specimenType ? 'border-destructive' : ''}>
+                  <SelectValue placeholder="Select a specimen type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cfDNA">cfDNA (cell-free DNA)</SelectItem>
+                  <SelectItem value="ctDNA">ctDNA (circulating tumour cell DNA)</SelectItem>
+                  <SelectItem value="CTC">CTC (circulating tumour cell)</SelectItem>
+                </SelectContent>
+              </Select>
+            </FormField>
+            <FormField label="Collection Date" error={errors.collectionDate}>
+              <Input
+                type="date"
+                value={formData.collectionDate}
+                onChange={(e) => handleChange('collectionDate', e.target.value)}
+                className={errors.collectionDate ? 'border-destructive' : ''}
+              />
+            </FormField>
+          </CardContent>
+        </Card>
 
-              <div className="form-group">
-                <label className="form-label" htmlFor="patientDOB">Date of Birth</label>
-                <input
-                  type="date"
-                  id="patientDOB"
-                  name="patientDOB"
-                  className={`form-input ${errors.patientDOB ? 'input-error' : ''}`}
-                  value={formData.patientDOB}
-                  onChange={handleChange}
-                />
-                {errors.patientDOB && <span className="error-text">{errors.patientDOB}</span>}
-              </div>
-
-              <div className="form-group">
-                <label className="form-label" htmlFor="patientID">Patient ID</label>
-                <input
-                  type="text"
-                  id="patientID"
-                  name="patientID"
-                  className={`form-input ${errors.patientID ? 'input-error' : ''}`}
-                  value={formData.patientID}
-                  onChange={handleChange}
-                  placeholder="e.g. PID-12345"
-                />
-                {errors.patientID && <span className="error-text">{errors.patientID}</span>}
-              </div>
-            </div>
-          </div>
-
-          <hr className="form-divider" />
-
-          {/* Requesting Physician Section */}
-          <div className="form-section">
-            <h3 className="form-section-title">Requesting Physician</h3>
-            <div className="form-grid">
-              <div className="form-group">
-                <label className="form-label" htmlFor="physicianName">Physician Full Name</label>
-                <input
-                  type="text"
-                  id="physicianName"
-                  name="physicianName"
-                  list="physician-list"
-                  className={`form-input ${errors.physicianName ? 'input-error' : ''}`}
-                  value={formData.physicianName}
-                  onChange={handleChange}
-                  placeholder="e.g. Dr. Emily Chen"
-                />
-                <datalist id="physician-list">
-                  <option value="Dr. Emily Chen" />
-                  <option value="Dr. Michael Rodriguez" />
-                  <option value="Dr. Sarah Lee" />
-                  <option value="Dr. David Kim" />
-                </datalist>
-                {errors.physicianName && <span className="error-text">{errors.physicianName}</span>}
-              </div>
-
-              <div className="form-group">
-                <label className="form-label" htmlFor="hospitalName">Hospital / Institution</label>
-                <input
-                  type="text"
-                  id="hospitalName"
-                  name="hospitalName"
-                  list="hospital-list"
-                  className={`form-input ${errors.hospitalName ? 'input-error' : ''}`}
-                  value={formData.hospitalName}
-                  onChange={handleChange}
-                  placeholder="e.g. General Memorial Hospital"
-                />
-                <datalist id="hospital-list">
-                  <option value="General Memorial Hospital" />
-                  <option value="City Cancer Center" />
-                  <option value="University Hospital" />
-                  <option value="Regional Medical Center" />
-                </datalist>
-                {errors.hospitalName && <span className="error-text">{errors.hospitalName}</span>}
-              </div>
-            </div>
-          </div>
-
-          <hr className="form-divider" />
-
-          {/* Test Section */}
-          <div className="form-section">
-            <h3 className="form-section-title">Test Details</h3>
-            <div className="form-grid">
-              <div className="form-group">
-                <label className="form-label">Test Name</label>
-                <div className="form-read-only">OncoInsight</div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label" htmlFor="specimenType">Specimen Type</label>
-                <select
-                  id="specimenType"
-                  name="specimenType"
-                  className={`form-select ${errors.specimenType ? 'input-error' : ''}`}
-                  value={formData.specimenType}
-                  onChange={handleChange}
-                >
-                  <option value="" disabled>Select a specimen type</option>
-                  <option value="cfDNA">cfDNA (cell-free DNA)</option>
-                  <option value="ctDNA">ctDNA (circulating tumour cell DNA)</option>
-                  <option value="CTC">CTC (circulating tumour cell)</option>
-                </select>
-                {errors.specimenType && <span className="error-text">{errors.specimenType}</span>}
-              </div>
-
-              <div className="form-group">
-                <label className="form-label" htmlFor="collectionDate">Collection Date</label>
-                <input
-                  type="date"
-                  id="collectionDate"
-                  name="collectionDate"
-                  className={`form-input ${errors.collectionDate ? 'input-error' : ''}`}
-                  value={formData.collectionDate}
-                  onChange={handleChange}
-                />
-                {errors.collectionDate && <span className="error-text">{errors.collectionDate}</span>}
-              </div>
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <Link to="/test-orders" className="btn btn-secondary" style={{ textDecoration: 'none' }}>
-              Cancel
-            </Link>
-            <button type="submit" className="btn btn-primary">
-              <Save size={18} />
-              Submit Order
-            </button>
-          </div>
-        </form>
-      </div>
+        <div className="flex justify-end gap-3">
+          <Button variant="outline" type="button" onClick={() => navigate('/test-orders')}>
+            Cancel
+          </Button>
+          <Button type="submit">
+            <Save size={16} />
+            Submit Order
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };

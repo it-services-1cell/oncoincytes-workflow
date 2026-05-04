@@ -1,86 +1,16 @@
-# Oncoincytes Workflow
+# React + Vite
 
-A React + Vite workflow application for managing batches, test orders, and reports in a laboratory or clinical operations context.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Features
+Currently, two official plugins are available:
 
-- React 19 app built with Vite
-- Client-side routing using `react-router-dom`
-- Global state management with `zustand`
-- Toast notifications via `react-hot-toast`
-- Tailwind CSS-ready setup with PostCSS
-- Workflow pages for batches, test orders, reports, and batch details
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## Getting Started
+## React Compiler
 
-### Prerequisites
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-- Node.js 18+ recommended
-- npm (included with Node.js)
+## Expanding the ESLint configuration
 
-### Install dependencies
-
-```bash
-npm install
-```
-
-### Run in development
-
-```bash
-npm run dev
-```
-
-Open the local URL shown in the terminal (usually `http://localhost:5173`).
-
-### Build for production
-
-```bash
-npm run build
-```
-
-### Preview production build
-
-```bash
-npm run preview
-```
-
-### Lint the project
-
-```bash
-npm run lint
-```
-
-## Project Structure
-
-```text
-src/
-  App.jsx           # root app component
-  main.jsx          # app entry point
-  index.css         # global styles
-  assets/           # static images and assets
-  components/       # reusable UI components
-    Header.jsx
-    Sidebar.jsx
-  layouts/          # layout components
-    MainLayout.jsx
-  pages/            # routed page components
-    BatchDetail.jsx
-    Batches.jsx
-    CPCWorkflow.jsx
-    CreateBatch.jsx
-    NewTestOrder.jsx
-    Reports.jsx
-    TestOrderDetail.jsx
-    TestOrders.jsx
-  store/
-    useStore.js    # Zustand global store
-vite.config.js     # Vite configuration
-eslint.config.js   # ESLint setup
-README.md          # project documentation
-package.json       # npm package metadata
-```
-
-## Notes
-
-- This repository is configured as a private project
-- The app is ready for extension with backend integration and API data sources
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
